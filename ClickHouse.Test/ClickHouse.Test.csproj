@@ -17,7 +17,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ClickHouse.Test</RootNamespace>
     <AssemblyName>ClickHouse.Test</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFrameworkProfile />
@@ -67,9 +67,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ClickHouse.Ado\ClickHouse.Ado.NETStandard.csproj">
-      <Project>{a858251a-1b78-4af8-a104-86ed711b1b07}</Project>
-      <Name>ClickHouse.Ado.NETStandard</Name>
+    <ProjectReference Include="..\ClickHouse.Ado\ClickHouse.Ado.Netcore.csproj">
+      <Project>{dfe3d0f3-4eee-437a-a1ed-353b4fe0dfa7}</Project>
+      <Name>ClickHouse.Ado.Netcore</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

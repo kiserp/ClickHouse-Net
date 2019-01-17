@@ -3,7 +3,11 @@
 using System.Data;
 #endif
 using System.IO;
+using System.Net;
+using System.Net.Security;
 using System.Net.Sockets;
+using System.Security.Authentication;
+using System.Security.Cryptography.X509Certificates;
 using ClickHouse.Ado.Impl;
 using ClickHouse.Ado.Impl.Data;
 
@@ -14,6 +18,12 @@ namespace ClickHouse.Ado
         : IDbConnection
 #endif
     {
+        private bool UseSSL { get; set; } = false;
+
+        private static bool _SslValidationPassThrough { get; set; } = false;
+
+        public X509Certificate ServerCertificate { get; private set; }
+
         public ClickHouseConnectionSettings ConnectionSettings { get; private set; }
 
         public ClickHouseConnection()
@@ -29,6 +39,13 @@ namespace ClickHouse.Ado
             ConnectionSettings = new ClickHouseConnectionSettings(connectionString);
         }
 
+        public ClickHouseConnection(string connectionString, bool useSSL, bool sslValidationPassthrough = false)
+        {
+            ConnectionSettings = new ClickHouseConnectionSettings(connectionString);
+            //ServerCertificate = X509Certificate.CreateFromCertFile(certPath);
+            UseSSL = useSSL;
+            _SslValidationPassThrough = sslValidationPassthrough;
+        }
         private TcpClient _tcpClient;
         private Stream _stream;
         private Stream _bufferedStream;
@@ -98,6 +115,20 @@ namespace ClickHouse.Ado
         }
 
 
+        public static bool ValidateServerCertificate(
+              object sender,
+              X509Certificate certificate,
+              X509Chain chain,
+              SslPolicyErrors sslPolicyErrors)
+        {
+            
+            if (sslPolicyErrors == SslPolicyErrors.None || _SslValidationPassThrough)
+            {
+                return true;
+            }
+            return false;
+        }
+
         public void Open()
         {
             if(_tcpClient!=null)throw new InvalidOperationException("Connection already open.");
@@ -115,8 +146,32 @@ namespace ClickHouse.Ado
 			_tcpClient.Connect(ConnectionSettings.Host, ConnectionSettings.Port);
 #endif
             _netStream = new NetworkStream(_tcpClient.Client);
-            _bufferedStream=new BufferedStream(_netStream);
-            _stream =new UnclosableStream(_bufferedStream);
+
+            if (!UseSSL)
+            {
+                _bufferedStream = new BufferedStream(_netStream);
+                _stream = new UnclosableStream(_bufferedStream);
+            }
+            else
+            {
+                var sslStream = new SslStream(_netStream, 
+                                                false,
+                                                new RemoteCertificateValidationCallback(ValidateServerCertificate),
+                                                null
+                                                );
+                try
+                {
+
+                    sslStream.AuthenticateAsClient(ConnectionSettings.Host);
+                }
+                catch (Exception ex)
+                {
+                    _tcpClient.Close();
+                    throw ex;
+                }
+                _stream = new UnclosableStream(sslStream);
+            }
+            //_stream = new UnclosableStream(_bufferedStream);
             /*_reader=new BinaryReader(new UnclosableStream(_stream));
             _writer=new BinaryWriter(new UnclosableStream(_stream));*/
             var ci=new ClientInfo();
