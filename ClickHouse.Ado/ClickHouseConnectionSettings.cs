@@ -94,9 +94,10 @@ namespace ClickHouse.Ado
         public string Host{ get; private set; }
         public int Port{ get; private set; }
 
+        public bool UseSSL { get; private set; } = false;
+        public bool SslValidationPassThrough { get; private set; } = false;
         //additional
         public int MaxCompressBufferSize{ get; private set; }
-
 
         // queries settings
         public int MaxParallelReplicas{ get; private set; }

@@ -7,7 +7,7 @@ namespace ClickHouse.Ado
 {
     public static class AdoExtensions
     {
-        public static void ReadAll<T>(this T reader, Action<T> rowAction) where T:
+        public static void ReadAll<T>(this T reader, Action<T> rowAction) where T :
 #if NETCOREAPP11
             ClickHouseDataReader
 #else
@@ -23,6 +23,7 @@ namespace ClickHouse.Ado
             } while (reader.NextResult());
         }
 
+        private static void DoNothingFunc() { }
 #if NETCOREAPP11
         public static ClickHouseCommand AddParameter(this ClickHouseCommand cmd, string name, DbType type, object value) 
 #else

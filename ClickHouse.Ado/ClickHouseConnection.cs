@@ -18,7 +18,7 @@ namespace ClickHouse.Ado
         : IDbConnection
 #endif
     {
-        private bool UseSSL { get; set; } = false;
+        //private bool UseSSL { get; set; } = false;
 
         private static bool _SslValidationPassThrough { get; set; } = false;
 
@@ -33,19 +33,29 @@ namespace ClickHouse.Ado
         public ClickHouseConnection(ClickHouseConnectionSettings settings)
         {
             ConnectionSettings = settings;
+            _SslValidationPassThrough = settings.SslValidationPassThrough;
         }
         public ClickHouseConnection(string connectionString)
         {
             ConnectionSettings = new ClickHouseConnectionSettings(connectionString);
+            _SslValidationPassThrough = ConnectionSettings.SslValidationPassThrough;
         }
 
-        public ClickHouseConnection(string connectionString, bool useSSL, bool sslValidationPassthrough = false)
-        {
-            ConnectionSettings = new ClickHouseConnectionSettings(connectionString);
-            //ServerCertificate = X509Certificate.CreateFromCertFile(certPath);
-            UseSSL = useSSL;
-            _SslValidationPassThrough = sslValidationPassthrough;
-        }
+        //public ClickHouseConnection(ClickHouseConnectionSettings connectionSSettings, bool useSSL, bool sslValidationPassthrough = false)
+        //{
+        //    ConnectionSettings = connectionSSettings;
+        //    //ServerCertificate = X509Certificate.CreateFromCertFile(certPath);
+        //    UseSSL = useSSL;
+        //    _SslValidationPassThrough = sslValidationPassthrough;
+        //}
+
+        //public ClickHouseConnection(string connectionString, bool useSSL, bool sslValidationPassthrough = false)
+        //{
+        //    ConnectionSettings = new ClickHouseConnectionSettings(connectionString);
+        //    //ServerCertificate = X509Certificate.CreateFromCertFile(certPath);
+        //    UseSSL = useSSL;
+        //    _SslValidationPassThrough = sslValidationPassthrough;
+        //}
         private TcpClient _tcpClient;
         private Stream _stream;
         private Stream _bufferedStream;
@@ -147,7 +157,7 @@ namespace ClickHouse.Ado
 #endif
             _netStream = new NetworkStream(_tcpClient.Client);
 
-            if (!UseSSL)
+            if (!ConnectionSettings.UseSSL)
             {
                 _bufferedStream = new BufferedStream(_netStream);
                 _stream = new UnclosableStream(_bufferedStream);
@@ -169,7 +179,8 @@ namespace ClickHouse.Ado
                     _tcpClient.Close();
                     throw ex;
                 }
-                _stream = new UnclosableStream(sslStream);
+                //_stream = new UnclosableStream(sslStream);
+                _stream = sslStream;
             }
             //_stream = new UnclosableStream(_bufferedStream);
             /*_reader=new BinaryReader(new UnclosableStream(_stream));

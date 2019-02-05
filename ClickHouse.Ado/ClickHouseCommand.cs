@@ -122,7 +122,7 @@ namespace ClickHouse.Ado
                 }
                 else
                 {
-                    if (schema.Columns.Count != insertParser.valueList.Count())
+                     if (schema.Columns.Count != insertParser.valueList.Count())
                         throw new FormatException($"Value count mismatch. Server expected {schema.Columns.Count} and query contains {insertParser.valueList.Count()}.");
 
                     var valueList = insertParser.valueList as List<Parser.ValueType> ?? insertParser.valueList.ToList();
@@ -153,7 +153,7 @@ namespace ClickHouse.Ado
 
         public int ExecuteNonQuery()
         {
-            Execute(true, _clickHouseConnection);
+           Execute(true, _clickHouseConnection);
             return 0;
         }
 #if NETCOREAPP11
